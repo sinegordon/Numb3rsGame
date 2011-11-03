@@ -6,11 +6,18 @@
     <title>Numb3rsGame</title>
 </head>
 <body>
-    <canvas id = "gameCanvas" onclick = "CanvasClickHandler(event);"></canvas>
-    <br />
-    <button id = "setPosition" onclick = "ChangeMode();">Установить позицию</button>
+    <table>
+        <tr>
+            <td><canvas id = "gameCanvas" onclick = "CanvasClickHandler(event);"></canvas></td>
+        </tr>
+        <tr>
+            <td><button id = "setPosition" onclick = "ChangeMode();" 
+                    style="font-family: Arial, Helvetica, sans-serif">Установить позицию</button></td>
+        </tr>
+    </table> 
     <script type = "text/javascript" src = "TreePositions.js"></script>
-    <script type = "text/javascript" src = "AnalyzePosition.js"></script>
+    <script type = "text/javascript" src = "AdvancedDrawPosition.js"></script>
+    <script type = "text/javascript" src = "SimpleAnalyzePosition.js"></script>
     <script type = "text/javascript" src = "Mouse.js"></script>
     <script type = "text/javascript" src = "Work.js"></script>
 </body>

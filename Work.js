@@ -3,57 +3,63 @@ function SolveAndDraw() {
     treePos.BuildTreePositions(7);
     pos = AnalyzeTreePositions(treePos);
     treePos = new Position(canvas, 'red', pos, netLinks, netCoords);
-    context.fillStyle = "rgb(127,127,127)";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    mode = 1;
+    PlayBackGround();
     DrawPosition(treePos);
     if (treePos.StepForChip(0).length == 0) {
         alert("Вы проиграли!");
     }
 }
+
+PlayBackGround = function () {
+    if (mode == 1) {
+        up = (up + 1) % canvas.height;
+        context.drawImage(img1, 0, -up);
+        context.drawImage(img1, 0, canvas.height - up);
+        setTimeout("PlayBackGround(); DrawPosition(treePos);", 50);
+    }
+}
+
+SetBackGround = function () {
+    if (mode == 3) {
+        up = (up + 1) % canvas.height;
+        context.drawImage(img3, 0, -up);
+        context.drawImage(img3, 0, canvas.height - up);
+        setTimeout("SetBackGround(); DrawPosition(treePos);", 50);
+    }
+}
+
+ThinkBackGround = function () {
+    if (mode == 2) {
+        up += 1;
+        context.drawImage(img2, 0, -up);
+        context.drawImage(img2, 0, canvas.height - up);
+        setTimeout("ThinkBackGround(); DrawPosition(treePos);", 50);
+        context.strokeText("Думаю...", canvas.width / 2 - 10, canvas.height / 30);
+    }
+}
+
 // Изменить режим с "игра" на "установка позиции" и наоборот
 ChangeMode = function () {
     var elem = document.getElementById("setPosition");
     if (elem.textContent == "Установить позицию") {
+        mode = 3;
         pos1 = pos.slice();
         pos = [];
-        treePos.context.fillStyle = "rgb(187,187,187)";
-        treePos.context.fillRect(0, 0, canvas.width, canvas.height);
+        SetBackGround();
         treePos = new Position(canvas, "red", pos, netLinks, netCoords);
         DrawPosition(treePos);
         elem.textContent = "Отменить установку позиции";
     }
     else {
+        mode = 1;
         pos = pos1.slice();
         pos1 = [];
-        treePos.context.fillStyle = "rgb(127,127,127)";
-        treePos.context.fillRect(0, 0, canvas.width, canvas.height);
+        PlayBackGround();
         treePos = new Position(canvas, "red", pos, netLinks, netCoords);
         DrawPosition(treePos);
         elem.textContent = "Установить позицию";
     };
-}
-// Функция отрисовки объекта дерева позиций на canvas
-DrawPosition = function (treePos) {
-    for (var i = 0; i < treePos.netCoords.length; i++) {
-        for (var j = 0; j < treePos.netLinks[i].length; j++) {
-            treePos.context.beginPath();
-            treePos.context.moveTo(treePos.canvas.width * treePos.netCoords[i][0], treePos.canvas.height * treePos.netCoords[i][1]);
-            treePos.context.lineTo(treePos.canvas.width * treePos.netCoords[treePos.netLinks[i][j] - 1][0], treePos.canvas.height * treePos.netCoords[treePos.netLinks[i][j] - 1][1]);
-            treePos.context.stroke();
-        }
-    }
-    if (treePos.pos.length > 0) {
-        treePos.context.fillStyle = "rgb(255,0,0)";
-        treePos.context.beginPath();
-        treePos.context.arc(treePos.canvas.width * treePos.netCoords[treePos.pos[0] - 1][0], treePos.canvas.height * treePos.netCoords[treePos.pos[0] - 1][1], radius, 0.0, 2 * Math.PI, true);
-        treePos.context.fill();
-    }
-    treePos.context.fillStyle = "rgb(0,0,0)";
-    for (var i = 1; i < treePos.pos.length; i++) {
-        treePos.context.beginPath();
-        treePos.context.arc(treePos.canvas.width * treePos.netCoords[treePos.pos[i] - 1][0], treePos.canvas.height * treePos.netCoords[treePos.pos[i] - 1][1], radius, 0.0, 2 * Math.PI, true);
-        treePos.context.fill();
-    }
 }
 // Обработчик клика мыши на canvas
 function CanvasClickHandler(event) {
@@ -72,20 +78,19 @@ function CanvasClickHandler(event) {
         }
         if (pos.length == 4) {
             elem.textContent = "Установить позицию";
-            treePos.context.fillStyle = "rgb(127,127,127)";
-            treePos.context.fillRect(0, 0, canvas.width, canvas.height);
+            mode = 1;
+            PlayBackGround();
             DrawPosition(treePos);
         }
     }
     else {
         var flag = treePos.ChipMove(0, x, y);
         if (flag == false) {
-            alert("Такой ход запрещен!");
+            alert("Такой ход запрещен!\nХодить красной фишкой можно только на соседние\nнезанятые узлы сетки.");
         }
         else {
-            context.fillStyle = "rgb(245,245,245)";
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            context.strokeText("Думаю...", canvas.width / 2 - 10, canvas.height / 30);
+            mode = 2;
+            ThinkBackGround();
             DrawPosition(treePos);
             setTimeout("SolveAndDraw();", 100);
         };
@@ -97,6 +102,15 @@ var canvas = document.getElementById("gameCanvas");
 canvas.width = 300;
 canvas.height = 600;
 var context = canvas.getContext('2d');
+var img1 = new Image();
+img1.onload = function () { PlayBackGround(); DrawPosition(treePos); alert("Ходя красной фишкой не дайте себя зажать!"); };
+img1.src = "Back1.png";
+var img2 = new Image();
+img2.src = "Back2.png";
+var img3 = new Image();
+img3.src = "Back3.png";
+var up = 0;
+var mode = 1;
 // Координаты вершин игрового графа в долях ширины и высоты канвы соответственно
 var netCoords = [[0.5, 0.1], [0.1, 0.25], [0.5, 0.25], [0.9, 0.25], [0.1, 0.5], [0.5, 0.5], [0.9, 0.5], [0.1, 0.75], [0.5, 0.75], [0.9, 0.75], [0.5, 0.9]];
 // Список смежности вершин netCoords
@@ -109,6 +123,5 @@ var pos1 = [];
 // Радиус фишки
 var radius = 30.0;
 var treePos = new Position(canvas, "red", pos, netLinks, netCoords);
-context.fillStyle = "rgb(127,127,127)";
-context.fillRect(0, 0, canvas.width, canvas.height);
+PlayBackGround();
 DrawPosition(treePos);
